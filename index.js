@@ -131,20 +131,20 @@ app.get('/db2/get', (req, res) => {
 
 
 //PERMET DE LIRE TOUS LES ELEMENTS D'UNE CATEGORIE DANS LA DATABASE 2
-app.get('/db2/get2', (req, res) => {
+app.get('/db2/get2/:id', (req, res) => {
   const id = req.params.id
   const sql = `
     SELECT items.id, items.name, items.price, items.description
     FROM items
     JOIN items_category ON items.id = items_category.items_id
-    WHERE items_category.items_category = ?`
+    WHERE items_category.category_id = ?`
  
-  dataBase.query(sql, [id], (err, results) => {
+  dataBase2.query(sql, [id], (err, results) => {
     if (err) {
       console.log(err)
-      return res.status(500).json({ error: 'Erreur du serveur lors de la récupération des items.' })
+      return res.status(500).json({ error: 'Erreur du serveur lors de la récupération des items.  ' + err })
     } else if (results.length === 0) {
-      return res.status(404).json({ message: 'Aucun élément trouvé pour cette catégorie.' })
+      return res.status(404).json({ message: 'Aucun élément trouvé pour cette catégorie.  ' + err })
     } else {
       return res.status(200).json(results)
     }
