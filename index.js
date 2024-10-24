@@ -234,63 +234,63 @@ app.delete('/db1/delete', (req, res) => {
 })
 
 
-//PERMET DE SUPPRIMER UN ELEMENT DE LA DATABASE 2
-// app.delete('/db2/delete', (req, res) => {
-//   const { name, price, id, description } = req.body
-//   let sql = 'DELETE FROM items WHERE 1=1'
-//   let queryParams = []
+// PERMET DE SUPPRIMER UN ELEMENT DE LA DATABASE 2
+app.delete('/db2/delete', (req, res) => {
+  const { name, price, id, description } = req.body;
+  let sql = 'DELETE FROM items WHERE 1=1';
+  let queryParams = [];
 
-//   if (name) {
-//     sql += ' AND name = ?'
-//     queryParams.push(name)
-//   }
-//   if (price) {
-//     sql += ' AND price = ?'
-//     queryParams.push(price)
-//   }
-//   if (id) {
-//     sql += ' AND id = ?'
-//     queryParams.push(id)
-//   }
-//   if (description) {
-//     sql += ' AND description = ?'
-//     queryParams.push(description)
-//   }
-//   if (queryParams.length === 0) {
-//     return res.status(400).json({ error: 'Aucun critère fourni pour la suppression' })
-//   }
+  if (name) {
+    sql += ' AND name = ?';
+    queryParams.push(name);
+  }
+  if (price) {
+    sql += ' AND price = ?';
+    queryParams.push(price);
+  }
+  if (id) {
+    sql += ' AND id = ?';
+    queryParams.push(id);
+  }
+  if (description) {
+    sql += ' AND description = ?';
+    queryParams.push(description);
+  }
+  if (queryParams.length === 0) {
+    return res.status(400).json({ error: 'Aucun critère fourni pour la suppression' + err });
+  }
 
-//   const sqlDeleteItemCategory = 'DELETE FROM items_category WHERE items_id = ?'
-  
-//   const sql_find_items_id = 'SELECT id FROM items WHERE 1=1'
-//   let findItemParams = [...queryParams]
+  const sqlDeleteItemCategory = 'DELETE FROM items_category WHERE items_id = ?';
+  const sqlFindItemsId = 'SELECT id FROM items WHERE 1=1';
 
-//   dataBase2.query( sql_find_items_id, findItemParams, (err, results) => {
-//     if (err || results.length === 0) {
-//       return res.status(500).json({ error: 'Erreur lors de la recherche de l\'élément à supprimer' })
-//     }
+  // Étape 1: Trouver les éléments correspondants dans items
+  dataBase2.query(sqlFindItemsId, queryParams, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: "Erreur lors de la recherche de l'élément à supprimer" + err });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Aucun élément trouvé pour la suppression' + err });
+    }
 
-//     const itemId = results[0].id
+    const itemId = results[0].id;
 
-//     // Suppression dans items_category
-//     dataBase2.query(sqlDeleteItemCategory, [items_id], (err, result) => {
-//       if (err) {
-//         console.error('Erreur lors de la suppression dans items_category:', err)
-//         return res.status(500).json({ error: 'Erreur lors de la suppression dans items_category' })
-//       }
+    // Étape 2: Supprimer les liens dans items_category
+    dataBase2.query(sqlDeleteItemCategory, [itemId], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Erreur lors de la suppression dans category_items' + err });
+      }
 
-//       // Étape 2: Suppression dans items
-//       dataBase2.query(sqlDeleteItem, queryParams, (err, results) => {
-//         if (err) {
-//           console.error('Erreur lors de la suppression dans items:', err)
-//           return res.status(500).json({ error: 'Erreur lors de la suppression dans items' })
-//         }
+      // Étape 3: Supprimer l'élément dans items
+      dataBase2.query(sql, queryParams, (err, results) => {
+        if (err) {
+          return res.status(500).json({ error: 'Erreur lors de la suppression' + err});
+        }
 
-//         return res.status(200).json({ message: 'Élément et ses associations supprimés avec succès', results })
-//       })
-//     })
-//   })
-// })
+        return res.status(200).json({ message: 'Element bien supprimé', results });
+      });
+    });
+  });
+});
 
 
 
